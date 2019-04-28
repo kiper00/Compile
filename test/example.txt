@@ -7,8 +7,8 @@ procedure p;
  
 begin
  read(b);
- while b#0 do
+ while do
   begin
-   call p;writeln(2*c);read(b);
+   aaaaaaaaaaa
   end
 end.
