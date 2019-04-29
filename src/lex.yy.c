@@ -563,12 +563,16 @@ char *yytext;
 #include <stdio.h>
 #include <stdlib.h>
 
+#define token(t) {LIST; printf("<'%s'>\n",t);}
+#define tokenKeyword(t) {LIST; printf("<%s>\n",t);}
+#define tokenInteger(t) {LIST; printf("<int:%d>\n",t);}
+#define tokenString(t,s) {LIST; printf("<%s:%s>\n",#t,s);}
+
 #define MAX_LINE_LENG 256
 #define LIST strcat(buf,yytext)
 
 int linenum = 0;
 char buf[MAX_LINE_LENG];
-
 
 typedef struct SymbolTable{
 	int index;
@@ -580,7 +584,7 @@ SymbolTable* lead;
 SymbolTable* end;
 
 
-#line 584 "lex.yy.c"
+#line 588 "lex.yy.c"
 
 #define INITIAL 0
 #define commentState 1
@@ -799,10 +803,10 @@ YY_DECL
 		}
 
 	{
-#line 34 "main.l"
+#line 38 "main.l"
 
 
-#line 806 "lex.yy.c"
+#line 810 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -861,7 +865,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 36 "main.l"
+#line 40 "main.l"
 {		
 			LIST;
 			BEGIN(commentState);
@@ -869,7 +873,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 41 "main.l"
+#line 45 "main.l"
 {
 			LIST;
 			BEGIN(INITIAL);
@@ -877,13 +881,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 46 "main.l"
+#line 50 "main.l"
 {LIST;}
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 48 "main.l"
+#line 52 "main.l"
 {
 			LIST;
 			linenum++;
@@ -893,101 +897,86 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 55 "main.l"
-{
-			LIST;
-			printf("<int:%s>\n",yytext);
-		}
+#line 59 "main.l"
+{tokenInteger(yytext);}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 60 "main.l"
-{
-			LIST;
-			printf("<'%s'>\n",yytext);
-		}
+#line 61 "main.l"
+{token(yytext);}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 65 "main.l"
-{
-			LIST;
-			printf("<'%s'>\n",yytext);
-		}
+#line 63 "main.l"
+{token(yytext);}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 70 "main.l"
-{
-			LIST;
-			printf("<%s>\n",yytext);
-		}
+#line 65 "main.l"
+{tokenKeyword(yytext);}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 75 "main.l"
+#line 67 "main.l"
 {
-			LIST;
-			printf("<id: %s>\n",yytext);
-			insert(yytext);
+		tokenString(id,yytext);
+		insert(yytext);
 		}
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 81 "main.l"
+#line 72 "main.l"
 {
-			LIST;
-			char* tmp = (char*)malloc(sizeof(char)*(yyleng-2));
-			for(int i = 1; i < yyleng - 1;i++)
-				tmp[i - 1] = yytext[i];
-			printf("<string: %s>\n",tmp);
+		char* tmp = (char*)malloc(sizeof(char)*(yyleng-2));
+		for(int i = 1; i < yyleng - 1;i++)
+			tmp[i - 1] = yytext[i];
+		tokenString(string,tmp);
 		}
 	YY_BREAK
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 89 "main.l"
+#line 79 "main.l"
 {
-			LIST;
-			linenum++;
-			printf("%d: %s", linenum, buf);
-			buf[0] = '\0';
+		LIST;
+		linenum++;
+		printf("%d: %s", linenum, buf);
+		buf[0] = '\0';
 		}
 	YY_BREAK
 case 12:
 /* rule 12 can match eol */
 YY_RULE_SETUP
-#line 97 "main.l"
+#line 87 "main.l"
 {
-			LIST;
-			linenum++;
-			printf("%d: %s", linenum, buf);
-			buf[0] = '\0';
+		LIST;
+		linenum++;
+		printf("%d: %s", linenum, buf);
+		buf[0] = '\0';
 		}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 104 "main.l"
+#line 94 "main.l"
 {LIST;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 106 "main.l"
+#line 96 "main.l"
 {
-			LIST;
-			printf("<'.'>\n");
-			printf("%d:%s\n", linenum+1, buf);
-			dump();
-			exit(-1);
+		token(yytext);
+		printf("%d: %s\n", linenum+1, buf);
+		dump();
+		exit(-1);
 		}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 114 "main.l"
+#line 103 "main.l"
 ECHO;
 	YY_BREAK
-#line 991 "lex.yy.c"
+#line 980 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(commentState):
 	yyterminate();
@@ -1989,7 +1978,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 114 "main.l"
+#line 103 "main.l"
 
 
 
@@ -2045,7 +2034,7 @@ void dump(){
 		}
 	}
 	else
-		printf("No Symbol Table.\n");
+		printf("\nNo Symbol Table.\n");
 }
 
 int main(){

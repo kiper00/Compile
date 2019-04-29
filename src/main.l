@@ -2,12 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define token(t) {LIST; printf("<'%s'>\n",t);}
+#define tokenKeyword(t) {LIST; printf("<%s>\n",t);}
+#define tokenInteger(t) {LIST; printf("<int:%d>\n",t);}
+#define tokenString(t,s) {LIST; printf("<%s:%s>\n",#t,s);}
+
 #define MAX_LINE_LENG 256
 #define LIST strcat(buf,yytext)
 
 int linenum = 0;
 char buf[MAX_LINE_LENG];
-
 
 typedef struct SymbolTable{
 	int index;
@@ -52,63 +56,48 @@ comment 	\/\/[^\n]+\n
 			buf[0] = '\0';
 		}
 
-{number}	{
-			LIST;
-			printf("<int:%s>\n",yytext);
-		}
+{number}	{tokenInteger(yytext);}
 
-{symbol}	{
-			LIST;
-			printf("<'%s'>\n",yytext);
-		}
+{symbol}	{token(yytext);}
 
-{operator}	{
-			LIST;
-			printf("<'%s'>\n",yytext);
-		}
+{operator}	{token(yytext);}
 
-{keyword}	{
-			LIST;
-			printf("<%s>\n",yytext);
-		}
+{keyword}	{tokenKeyword(yytext);}
 
 {id}		{
-			LIST;
-			printf("<id: %s>\n",yytext);
-			insert(yytext);
+		tokenString(id,yytext);
+		insert(yytext);
 		}
 
 {string}	{
-			LIST;
-			char* tmp = (char*)malloc(sizeof(char)*(yyleng-2));
-			for(int i = 1; i < yyleng - 1;i++)
-				tmp[i - 1] = yytext[i];
-			printf("<string:%s>\n",tmp);
+		char* tmp = (char*)malloc(sizeof(char)*(yyleng-2));
+		for(int i = 1; i < yyleng - 1;i++)
+			tmp[i - 1] = yytext[i];
+		tokenString(string,tmp);
 		}
 
 {comment}	{
-			LIST;
-			linenum++;
-			printf("%d: %s", linenum, buf);
-			buf[0] = '\0';
+		LIST;
+		linenum++;
+		printf("%d: %s", linenum, buf);
+		buf[0] = '\0';
 		}
 
 
 \n 		{
-			LIST;
-			linenum++;
-			printf("%d: %s", linenum, buf);
-			buf[0] = '\0';
+		LIST;
+		linenum++;
+		printf("%d: %s", linenum, buf);
+		buf[0] = '\0';
 		}
 	
 [ \t]* 		{LIST;}
 
 "."       	{
-			LIST;
-			printf("<'.'>\n");
-			printf("%d: %s\n", linenum+1, buf);
-			dump();
-			exit(-1);
+		token(yytext);
+		printf("%d: %s\n", linenum+1, buf);
+		dump();
+		exit(-1);
 		}
 
 %%
@@ -165,7 +154,7 @@ void dump(){
 		}
 	}
 	else
-		printf("No Symbol Table.\n");
+		printf("\nNo Symbol Table.\n");
 }
 
 int main(){
