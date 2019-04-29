@@ -83,7 +83,7 @@ comment 	\/\/[^\n]+\n
 			char* tmp = (char*)malloc(sizeof(char)*(yyleng-2));
 			for(int i = 1; i < yyleng - 1;i++)
 				tmp[i - 1] = yytext[i];
-			printf("<string: %s>\n",tmp);
+			printf("<string:%s>\n",tmp);
 		}
 
 {comment}	{
@@ -106,7 +106,7 @@ comment 	\/\/[^\n]+\n
 "."       	{
 			LIST;
 			printf("<'.'>\n");
-			printf("%d:%s\n", linenum+1, buf);
+			printf("%d: %s\n", linenum+1, buf);
 			dump();
 			exit(-1);
 		}
