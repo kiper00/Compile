@@ -2,8 +2,21 @@
 #define Trace(t)        printf(t)
 %}
 
-/* tokens */
-%token SEMICOLON
+/* token */
+%token SET RAL LE GE AND OR
+/* tokenKeyword */
+%token ARRAY BOOLEAN BEGIN BREAK CHAR CASE CONST CONTINUE DO ELSE END EXIT FALSE FOR FN IF IN INTEGER
+%token LOOP MODULE PRINT PRINTLN PROCEDURE REPEAT RETURN REAL STRING RECORD THEN TRUE TYPE USE VAR UTIL WHILE
+
+/* precedence */
+%left OR
+%left AND
+%left '~'
+%left '<' LE EQ GE '>' RAL
+%left '+' '-'
+%left '*' '/'
+// %left -(unary)
+%nonassoc UMINUS
 
 %%
 program:        identifier semi
@@ -12,11 +25,6 @@ program:        identifier semi
                 }
                 ;
 
-semi:           SEMICOLON
-                {
-                Trace("Reducing to semi\n");
-                }
-                ;
 %%
 #include "lex.yy.c"
 
@@ -39,5 +47,3 @@ main()
     if (yyparse() == 1)                 /* parsing */
         yyerror("Parsing error !");     /* syntax error */
 }
-
-

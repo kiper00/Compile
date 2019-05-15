@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #define token(t) {LIST; printf("<'%s'>\n",t);}
-#define tokenKeyword(t) {LIST; printf("<%s>\n",t);}
+#define tokenKeyword(t) {LIST; printf("<%s>\n",t); return t;}
 #define tokenInteger(t) {LIST; printf("<int:%d>\n",t);}
 #define tokenString(t,s) {LIST; printf("<%s:%s>\n",#t,s);}
 
@@ -25,10 +25,9 @@ SymbolTable* end;
 %}
 
 word 		[a-zA-Z_]
-number 		[0-9]
-keyword 	array|boolean|begin|break|char|case|const|continue|do|else|end|exit|false|for|fn|if|in|integer|loop|module|print|println|procedure|repeat|return|real|string|record|then|true|type|use|var|util|while
-operator 	[+]|[-]|[*]|[/]|[%]|[:][=]|[>][=]|[<][=]|[=]|[~]|[|][|]|[&][&]|[<][>]|[>]|[<]
-id 		{word}({word}|{number})*
+number 		[-+]?{[0-9]+}
+operator 	[+]|[-]|[*]|[/]|[%]|[=]|[~]|[>]|[<]
+id 			{word}({word}|{number})*
 symbol 		[,]|[:]|[;]|[(]|[)]|[[]|[]]|[{]|[}]
 string 		\"[^\"]*\"
 comment 	\/\/[^\n]+\n
@@ -58,11 +57,54 @@ comment 	\/\/[^\n]+\n
 
 {number}	{tokenInteger(yytext);}
 
-{symbol}	{token(yytext);}
+{symbol}	{token(yytext); return yytext[0];}
 
-{operator}	{token(yytext);}
+{operator}	{token(yytext); return yytext[0];}
 
-{keyword}	{tokenKeyword(yytext);}
+ /* two-character token */
+":="		{ token(:=); return SET; }
+"<>"        { token(<>); return RAL; }
+"<="        { token(<=); return LE; }
+">="        { token(>=); return GE; }
+"&&"        { token(&&); return AND; }
+"||"        { token(||); return OR; }
+
+ /* keyword */
+"array"		{tokenKeyword(ARRAY);}
+"boolean"	{tokenKeyword(BOOLEAN);}
+"begin"		{tokenKeyword(BEGIN);}
+"break"		{tokenKeyword(BREAK);}
+"char"		{tokenKeyword(CHAR);}
+"case"		{tokenKeyword(CASE);}
+"const"		{tokenKeyword(CONST);}
+"continue"	{tokenKeyword(CONTINUE);}
+"do"		{tokenKeyword(DO);}
+"else"		{tokenKeyword(ELSE);}
+"end"		{tokenKeyword(END);}
+"exit"		{tokenKeyword(EXIT);}
+"false"		{tokenKeyword(FALSE);}
+"for"		{tokenKeyword(FOR);}
+"fn"		{tokenKeyword(FN);}
+"if"		{tokenKeyword(IF);}
+"in"		{tokenKeyword(IN);}
+"integer"	{tokenKeyword(INTEGER);}
+"loop"		{tokenKeyword(LOOP);}
+"module"	{tokenKeyword(MODULE);}
+"print"		{tokenKeyword(PRINT);}
+"println"	{tokenKeyword(PRINTLN);}
+"procedure"	{tokenKeyword(PROCEDURE);}
+"repeat"	{tokenKeyword(REPEAT);}
+"return"	{tokenKeyword(RETURN);}
+"real"		{tokenKeyword(REAL);}
+"string"	{tokenKeyword(STRING);}
+"record"	{tokenKeyword(RECORD);}
+"then"		{tokenKeyword(THEN);}
+"true"		{tokenKeyword(TRUE);}
+"type"		{tokenKeyword(TYPE);}
+"use"		{tokenKeyword(USE);}
+"var"		{tokenKeyword(VAR);}
+"util"		{tokenKeyword(UTIL);}
+"while"		{tokenKeyword(WHILE);}
 
 {id}		{
 		tokenString(id,yytext);
@@ -155,15 +197,4 @@ void dump(){
 	}
 	else
 		printf("\nNo Symbol Table.\n");
-}
-
-int main(){
-	create(); // create symbol table
-   	yylex(); /* start the analysis*/ 
-	dump(); // if no '.' in this case
-}
-
-int yywrap() 
-{ 
-	return 1; 
 }
