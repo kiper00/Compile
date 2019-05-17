@@ -1,9 +1,8 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #define Trace(t)     if(debug){printf(t); printf("\n");}
-int debug = 0;
+int debug = 1;
 %}
 
 /* yylval */
@@ -35,35 +34,44 @@ int debug = 0;
 %nonassoc UMINUS
 
 %%
-program:        MODULE ID BEG statement END ID {Trace("End Parse");}
-		|MODULE ID program_decl BEG statement END ID {Trace("End Parse");};
+program:        MODULE ID BEG statement END ID {Trace("End Parse");dump(lead);}
+		|MODULE ID program_decl BEG statement END ID {Trace("End Parse");printf("END\n");dump(lead);};
 
 program_decl:	fun
-		|variable_delc
-		|variable_delc fun;
+		|var_delc_glo
+		|var_delc_glo fun;
 
-variable_delc:	CONST const  
-		|VAR var
+var_delc_glo:	CONST const_glo  
+		|VAR var_glo
 		|array
-		|variable_delc variable_delc;
+		|var_delc_glo var_delc_glo;
+
+var_delc_loc: 	CONST const_loc  
+		|VAR var_loc
+		|array
+		|var_delc_loc var_delc_loc;
+
 
 statement:	statement statement
 		|simple
 		|loop
-		|condition;
+		|condition
+		|proc_invo;
 
-simple:		ID SET expression
-		|READ ID	
-		|PRINT  expression  ';' {Trace("PRINT ID");}
-		|PRINTLN  expression  ';' {Trace("PRINTLN");}
+simple:		ID SET expression';'
+		|ID'['INT_CON']'SET expression';'
+		|READ ID';'	
+		|PRINT expression';' {Trace("PRINT ID");}
+		|PRINTLN expression';' {Trace("PRINTLN");}
 		|RETURN';'
 		|RETURN expression';';
 
-comma_exp:	expression','expression
-		|comma_exp','expression;
 
 expression:	ID
 		|con_Var
+		|fun_invo
+		|ID'['INT_CON']'
+		|'-'expression %prec UMINUS
 		|expression'+'expression
 		|expression'-'expression
 		|expression'*'expression
@@ -78,15 +86,23 @@ expression:	ID
 		|expression AND expression
 		|expression OR expression
 		|expression RAL expression;
+
+comma_exp:	expression','expression
+		|comma_exp','expression;
+
+proc_invo:	ID'('')'';'
+		|ID'('comma_exp')'';';
+
+fun_invo:	ID'('')'
+		|ID'('comma_exp')';
 	
 fun:		PROCEDURE ID fun_var BEG statement END ID ';' {Trace("PROCEDURE");}
-		|PROCEDURE ID fun_var variable_delc BEG statement END ID ';' {Trace("PROCEDURE");};
+		|PROCEDURE ID fun_var var_delc_loc BEG statement END ID ';' {Trace("PROCEDURE");};
 
 fun_var:	'(' ')' {Trace("NULL var");}
 		|'(' var_decl {Trace("1 var");}
 		|fun_var ',' var_decl {Trace("more var");}
-		|fun_var ')' {Trace("END var");}
-		|fun_var ':' var_type {Trace("End fun Var");};
+		|fun_var ')' ':' var_type {Trace("End fun Var");};
 
 loop:		WHILE '(' expression ')' DO END';'
 		|WHILE '(' expression ')' DO statement END';';
@@ -98,12 +114,18 @@ condition:	IF '(' expression ')' THEN END
 		|IF '(' expression ')' THEN ELSE statement END
 		|IF '(' expression ')' THEN statement ELSE statement END;
 
-const:		const const
+const_glo:	const_glo const_glo
 		|ID '=' con_Var ';';
 
-array:		ID ':' ARRAY '[' INT_CON ',' INT_CON ']' OF var_type;
+const_loc:	const_loc const_loc
+		|ID '=' con_Var ';';
 
-var:		var var
+array:		ID ':' ARRAY '[' INT_CON ',' INT_CON ']' OF var_type';';
+
+var_glo:	var_glo var_glo
+		|var_decl ';';
+
+var_loc:	var_loc var_loc
 		|var_decl ';';
 
 var_decl:	ID ':' var_type {Trace("Announce")};

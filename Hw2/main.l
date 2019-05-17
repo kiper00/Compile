@@ -12,16 +12,6 @@
 
 int linenum = 0;
 char buf[MAX_LINE_LENG];
-
-typedef struct SymbolTable{
-	int index;
-	char id[MAX_LINE_LENG];
-	struct SymbolTable* next;
-}SymbolTable;
-
-SymbolTable* lead;	
-SymbolTable* end;
-
 %}
 
 word 		[a-zA-Z_]
@@ -109,6 +99,7 @@ comment 	\/\/[^\n]+\n
 "var"		{tokenKeyword("VAR"); return VAR;}
 "util"		{tokenKeyword("UTIL"); return UTIL;}
 "while"		{tokenKeyword("WHILE"); return WHILE;}
+"read"		{tokenKeyword("R"); return WHILE;}
 "of"		{LIST; return OF;}
 
 {id}		{
@@ -144,7 +135,7 @@ comment 	\/\/[^\n]+\n
 	
 [ \t]* 		{LIST;}
 
-"."       	{
+.       	{
 		token(yytext);
 		printf("%d: %s\n", linenum+1, buf);
 		//dump();
@@ -153,57 +144,3 @@ comment 	\/\/[^\n]+\n
 
 %%
 
-
-void create(){
-// Creates a symbol table
-
-	lead = (SymbolTable*)malloc(sizeof(SymbolTable));
-	lead->index = -1;
-	char *tmp = "";
-	strcpy( lead->id, tmp);
-	lead->next = NULL;
-	end = lead;
-}
-
-
-int lookup(char* input){
-// Returns index of the entry for string s, or nil if s is not found.
-
-	SymbolTable* table = lead;
-	while(table != NULL){
-		if(strcmp(table->id, input) == 0)
-			return table->index;
-		table = table->next;
-	}
-	return -1;
-}
-
-
-void insert(char* input){
-// Returns index of the entry for strings, ornilifsis not found.
-
-	if(lookup(input) == -1)
-	{
-		SymbolTable* table = (SymbolTable*)malloc(sizeof(SymbolTable));
-		table->index = end->index + 1;
-		strcpy( table->id, input);
-		end->next = table;
-		end = table;
-	}
-}
-
-void dump(){
-// Dumps all entries of the symbol table. returns index of the entry.
-
-	SymbolTable* table = lead;
-	table = table->next;
-	if(table != NULL){
-		printf("\nSymbol Table:\n");
-		while(table != NULL){
-			printf("%s\n",table->id);
-			table = table->next;
-		}
-	}
-	else
-		printf("\nNo Symbol Table.\n");
-}
