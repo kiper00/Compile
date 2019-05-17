@@ -64,92 +64,12 @@
 /* Copy the first part of user declarations.  */
 #line 1 "parse.y" /* yacc.c:339  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "SymbolTable.h"
 #define Trace(t)     if(debug){printf(t); printf("\n");}
-int debug = 1;
-typedef struct SymbolTable{
-	int 	index;
-	char 	id[256];	// ID name
-	int 	type;		// ID type
-				// type =-1, MODULE
-	int 	ival;		// type = 0, INTEGER
-	double 	dval;		// type = 1, REAL
-	int	bval;		// type = 2, BOOLEAN
-	char 	*cval;		// type = 3, STRING
-				// type = 4, ARRAY
-	struct 	FuncInfo* fval;	// type = 5, function
-
-	int 	isglobal;	// global = 0, local = 1
-
-	struct 	SymbolTable* next;
-		void create(SymbolTable* lead, SymbolTable* end){
-		// Creates a symbol table
-
-			lead = (SymbolTable*)malloc(sizeof(SymbolTable));
-			lead->index = -1;
-			char *tmp = "";
-			strcpy( lead->id, tmp);
-			lead->next = NULL;
-			end = lead;
-		}
+int debug = 0;
 
 
-		int lookup(SymbolTable* lead, char* input){
-		// Returns index of the entry for string s, or nil if s is not found.
-
-			SymbolTable* table = lead;
-			while(table != NULL){
-				if(strcmp(table->id, input) == 0)
-					return table->index;
-				table = table->next;
-			}
-			return -1;
-		}
-
-
-		void insert(SymbolTable* lead, SymbolTable* end, char* input){
-		// Returns index of the entry for strings, ornilifsis not found.
-
-			if(lookup(lead, input) == -1)
-			{
-				SymbolTable* table = (SymbolTable*)malloc(sizeof(SymbolTable));
-				table->index = end->index + 1;
-				strcpy( table->id, input);
-				end->next = table;
-				end = table;
-			}
-		}
-
-		void dump(SymbolTable* lead){
-		// Dumps all entries of the symbol table. returns index of the entry.
-
-			SymbolTable* table = lead;
-			table = table->next;
-			if(table != NULL){
-				printf("\nSymbol Table:\n");
-				while(table != NULL){
-					printf("%s\n",table->id);
-					table = table->next;
-				}
-			}
-			else
-				printf("\nNo Symbol Table.\n");
-		}
-
-}SymbolTable;
-
-typedef struct FuncInfo{
-	int returnType;		// Return's type = SymbolTable's type
-	int TotalVarCount;	// Variable's count
-	int var[256];		// Record variable's type
-}FuncInfo;
-
-SymbolTable* lead;
-SymbolTable* end;
-lead.create(lead,end);
-
-#line 153 "y.tab.c" /* yacc.c:339  */
+#line 73 "y.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -293,15 +213,15 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 89 "parse.y" /* yacc.c:355  */
+#line 9 "parse.y" /* yacc.c:355  */
 
 	int ival;
 	double dval;
 	int bval;
-	char *cval;
-	int type;
+	char* cval;
+	struct SymbolTable* tval;
 
-#line 305 "y.tab.c" /* yacc.c:355  */
+#line 225 "y.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -318,7 +238,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 322 "y.tab.c" /* yacc.c:358  */
+#line 242 "y.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -620,15 +540,15 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   117,   117,   118,   120,   121,   122,   124,   125,   126,
-     127,   129,   130,   131,   132,   135,   136,   137,   138,   139,
-     141,   142,   143,   144,   145,   146,   147,   150,   151,   152,
-     153,   154,   155,   156,   157,   158,   159,   160,   161,   162,
-     163,   164,   165,   166,   167,   168,   170,   171,   173,   174,
-     176,   177,   179,   180,   182,   183,   184,   185,   187,   188,
-     190,   191,   192,   193,   194,   195,   197,   198,   200,   201,
-     203,   205,   206,   208,   209,   211,   213,   214,   215,   216,
-     218,   219,   220,   221
+       0,    43,    43,    44,    46,    47,    48,    50,    51,    52,
+      53,    55,    56,    57,    58,    61,    62,    63,    64,    65,
+      67,    68,    69,    70,    71,    72,    73,    76,    77,    78,
+      79,    80,    81,    82,    83,    84,    85,    86,    87,    88,
+      89,    90,    91,    92,    93,    94,    96,    97,    99,   100,
+     102,   103,   105,   106,   108,   109,   110,   111,   113,   114,
+     116,   117,   118,   119,   120,   121,   123,   124,   126,   127,
+     129,   131,   132,   137,   138,   144,   154,   155,   156,   157,
+     159,   160,   161,   162
 };
 #endif
 
@@ -1610,97 +1530,123 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 117 "parse.y" /* yacc.c:1646  */
-    {Trace("End Parse");dump(lead);}
-#line 1616 "y.tab.c" /* yacc.c:1646  */
+#line 43 "parse.y" /* yacc.c:1646  */
+    {Trace("End Parse");dump();}
+#line 1536 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 118 "parse.y" /* yacc.c:1646  */
-    {Trace("End Parse");printf("END\n");lead.dump(lead);}
-#line 1622 "y.tab.c" /* yacc.c:1646  */
+#line 44 "parse.y" /* yacc.c:1646  */
+    {Trace("End Parse");dump();}
+#line 1542 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 144 "parse.y" /* yacc.c:1646  */
+#line 70 "parse.y" /* yacc.c:1646  */
     {Trace("PRINT ID");}
-#line 1628 "y.tab.c" /* yacc.c:1646  */
+#line 1548 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 145 "parse.y" /* yacc.c:1646  */
+#line 71 "parse.y" /* yacc.c:1646  */
     {Trace("PRINTLN");}
-#line 1634 "y.tab.c" /* yacc.c:1646  */
+#line 1554 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 179 "parse.y" /* yacc.c:1646  */
+#line 105 "parse.y" /* yacc.c:1646  */
     {Trace("PROCEDURE");}
-#line 1640 "y.tab.c" /* yacc.c:1646  */
+#line 1560 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 180 "parse.y" /* yacc.c:1646  */
+#line 106 "parse.y" /* yacc.c:1646  */
     {Trace("PROCEDURE");}
-#line 1646 "y.tab.c" /* yacc.c:1646  */
+#line 1566 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 182 "parse.y" /* yacc.c:1646  */
+#line 108 "parse.y" /* yacc.c:1646  */
     {Trace("NULL var");}
-#line 1652 "y.tab.c" /* yacc.c:1646  */
+#line 1572 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 183 "parse.y" /* yacc.c:1646  */
+#line 109 "parse.y" /* yacc.c:1646  */
     {Trace("1 var");}
-#line 1658 "y.tab.c" /* yacc.c:1646  */
+#line 1578 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 184 "parse.y" /* yacc.c:1646  */
+#line 110 "parse.y" /* yacc.c:1646  */
     {Trace("more var");}
-#line 1664 "y.tab.c" /* yacc.c:1646  */
+#line 1584 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 185 "parse.y" /* yacc.c:1646  */
+#line 111 "parse.y" /* yacc.c:1646  */
     {Trace("End fun Var");}
-#line 1670 "y.tab.c" /* yacc.c:1646  */
+#line 1590 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 72:
+#line 132 "parse.y" /* yacc.c:1646  */
+    {
+			Trace("insertVar");
+			insertVar((yyvsp[-1].tval));
+		}
+#line 1599 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 74:
+#line 138 "parse.y" /* yacc.c:1646  */
+    {
+			Trace("insertVar");
+			printf("TEST");
+			//insertVar($1);
+		}
+#line 1609 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 75:
-#line 211 "parse.y" /* yacc.c:1646  */
-    {Trace("Announce")}
-#line 1676 "y.tab.c" /* yacc.c:1646  */
+#line 145 "parse.y" /* yacc.c:1646  */
+    {	Trace("Announce");
+			printf("Announce\n");
+			if(lookup("aaa") == -1){
+				(yyval.tval) = tmpVar((yyvsp[-2].cval),(yyvsp[0].ival));
+}
+			else
+				yyerror("ID:%s conflict",(yyvsp[-2].cval));
+		}
+#line 1622 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 76:
-#line 213 "parse.y" /* yacc.c:1646  */
-    {Trace("int")}
-#line 1682 "y.tab.c" /* yacc.c:1646  */
+#line 154 "parse.y" /* yacc.c:1646  */
+    {Trace("int"); 	 (yyval.ival) = 0;}
+#line 1628 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 77:
-#line 214 "parse.y" /* yacc.c:1646  */
-    {Trace("real")}
-#line 1688 "y.tab.c" /* yacc.c:1646  */
+#line 155 "parse.y" /* yacc.c:1646  */
+    {Trace("real");  (yyval.ival) = 1;}
+#line 1634 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 78:
-#line 215 "parse.y" /* yacc.c:1646  */
-    {Trace("string")}
-#line 1694 "y.tab.c" /* yacc.c:1646  */
+#line 156 "parse.y" /* yacc.c:1646  */
+    {Trace("string");(yyval.ival) = 2;}
+#line 1640 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 79:
-#line 216 "parse.y" /* yacc.c:1646  */
-    {Trace("bool")}
-#line 1700 "y.tab.c" /* yacc.c:1646  */
+#line 157 "parse.y" /* yacc.c:1646  */
+    {Trace("bool");	 (yyval.ival) = 3;}
+#line 1646 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1704 "y.tab.c" /* yacc.c:1646  */
+#line 1650 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1928,11 +1874,12 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 222 "parse.y" /* yacc.c:1906  */
+#line 163 "parse.y" /* yacc.c:1906  */
 
 
 int yyerror(char *s){   
-	fprintf(stderr, "%s\n", s);   
+	fprintf(stderr, "%s\n", s); 
+	exit(-1);  
 	return 0;
 }
 

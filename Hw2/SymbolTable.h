@@ -1,3 +1,7 @@
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 typedef struct SymbolTable{
 	int 	index;
 	char 	id[256];	// ID name
@@ -7,7 +11,7 @@ typedef struct SymbolTable{
 	double 	dval;		// type = 1, REAL
 	int	bval;		// type = 2, BOOLEAN
 	char 	*cval;		// type = 3, STRING
-				// type = 4, ARRAY
+	int	aval;		// type = 4, ARRAY aval = array's type
 	struct 	FuncInfo* fval;	// type = 5, function
 
 	int 	isglobal;	// global = 0, local = 1
@@ -26,8 +30,11 @@ typedef struct FuncInfo{
 //void insert(SymbolTable* lead, SymbolTable* end, char* input);
 //void dump(SymbolTable* lead);
 
+SymbolTable* lead;
+SymbolTable* end;
 
-void create(SymbolTable* lead, SymbolTable* end){
+/* Create Block */
+void create(){
 // Creates a symbol table
 
 	lead = (SymbolTable*)malloc(sizeof(SymbolTable));
@@ -38,10 +45,18 @@ void create(SymbolTable* lead, SymbolTable* end){
 	end = lead;
 }
 
+SymbolTable* tmpVar(char* id, int type){
+	SymbolTable* table = (SymbolTable*)malloc(sizeof(SymbolTable));
+	strcpy( table->id, id);
+	table->type = type;
+	return table;
+}
 
-int lookup(SymbolTable* lead, char* input){
+/*Find Table*/
+int lookup(char* input){
 // Returns index of the entry for string s, or nil if s is not found.
-
+	if(lead == NULL)
+		return -1;
 	SymbolTable* table = lead;
 	while(table != NULL){
 		if(strcmp(table->id, input) == 0)
@@ -51,11 +66,22 @@ int lookup(SymbolTable* lead, char* input){
 	return -1;
 }
 
+/* Insert Block */
 
-void insert(SymbolTable* lead, SymbolTable* end, char* input){
+void insertVar(SymbolTable* table){
+
+	if(lead == NULL)
+		create();
+	table->index = end->index + 1;	
+	end->next = table;
+	end = table;
+}
+
+void insert(char* input){
 // Returns index of the entry for strings, ornilifsis not found.
-
-	if(lookup(lead, input) == -1)
+	if(lead == NULL)
+		create();
+	if(lookup(input) == -1)
 	{
 		SymbolTable* table = (SymbolTable*)malloc(sizeof(SymbolTable));
 		table->index = end->index + 1;
@@ -65,18 +91,38 @@ void insert(SymbolTable* lead, SymbolTable* end, char* input){
 	}
 }
 
-void dump(SymbolTable* lead){
+void dump(){
 // Dumps all entries of the symbol table. returns index of the entry.
-
+	if(lead != NULL){
 	SymbolTable* table = lead;
 	table = table->next;
 	if(table != NULL){
 		printf("\nSymbol Table:\n");
 		while(table != NULL){
+			if(table->isglobal == 0)
+				printf("global\t");
+			else
+				printf("local\t");
+
+			if(table->type == 0)
+				printf("integer\t");
+			else if(table->type == 1)
+				printf("real\t");
+			else if(table->type == 2)
+				printf("boolean\t");
+			else if(table->type == 3)
+				printf("string\t");			
+			else if(table->type == 4)
+				printf("array\t");
+			else
+				printf("function\t");
+
 			printf("%s\n",table->id);
 			table = table->next;
 		}
 	}
 	else
 		printf("\nNo Symbol Table.\n");
+}
+	printf("TEST\n");
 }

@@ -612,8 +612,6 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "main.l"
 #line 2 "main.l"
-#include <stdio.h>
-#include <stdlib.h>
 #include "y.tab.h"
 #define token(t) {LIST; printf("<'%s'>\n",t);}
 #define tokenKeyword(t) {LIST; printf("<%s>\n",t);}
@@ -626,7 +624,7 @@ char *yytext;
 int linenum = 0;
 char buf[MAX_LINE_LENG];
 
-#line 630 "lex.yy.c"
+#line 628 "lex.yy.c"
 
 #define INITIAL 0
 #define commentState 1
@@ -845,10 +843,10 @@ YY_DECL
 		}
 
 	{
-#line 29 "main.l"
+#line 27 "main.l"
 
 
-#line 852 "lex.yy.c"
+#line 850 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -907,7 +905,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 31 "main.l"
+#line 29 "main.l"
 {		
 			LIST;
 			BEGIN(commentState);
@@ -915,7 +913,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 36 "main.l"
+#line 34 "main.l"
 {
 			LIST;
 			BEGIN(INITIAL);
@@ -923,13 +921,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 41 "main.l"
+#line 39 "main.l"
 {LIST;}
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 43 "main.l"
+#line 41 "main.l"
 {
 			LIST;
 			linenum++;
@@ -939,244 +937,244 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 50 "main.l"
+#line 48 "main.l"
 {tokenInteger(atoi(yytext)); yylval.ival = atoi(yytext); return INT_CON;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 52 "main.l"
+#line 50 "main.l"
 {tokenString(real,yytext); yylval.dval = atof(yytext); return REAL_CON;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 54 "main.l"
+#line 52 "main.l"
 {token(yytext); return yytext[0];}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 56 "main.l"
+#line 54 "main.l"
 {token(yytext); return yytext[0];}
 	YY_BREAK
 /* two-character token */
 case 9:
 YY_RULE_SETUP
-#line 59 "main.l"
+#line 57 "main.l"
 {token(':='); return SET; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 60 "main.l"
+#line 58 "main.l"
 {token('<>'); return RAL; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 61 "main.l"
+#line 59 "main.l"
 {token('<='); return LE; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 62 "main.l"
+#line 60 "main.l"
 {token('>='); return GE; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 63 "main.l"
+#line 61 "main.l"
 {token('&&'); return AND; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 64 "main.l"
+#line 62 "main.l"
 {token('||'); return OR; }
 	YY_BREAK
 /* keyword */
 case 15:
 YY_RULE_SETUP
-#line 67 "main.l"
+#line 65 "main.l"
 {tokenKeyword("ARRAY"); return ARRAY;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 68 "main.l"
+#line 66 "main.l"
 {tokenKeyword("BOOLEAN"); return BOOLEAN;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 69 "main.l"
+#line 67 "main.l"
 {tokenKeyword("BEGIN"); return BEG;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 70 "main.l"
+#line 68 "main.l"
 {tokenKeyword("BREAK"); return BREAK;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 71 "main.l"
+#line 69 "main.l"
 {tokenKeyword("CHAR"); return CHAR;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 72 "main.l"
+#line 70 "main.l"
 {tokenKeyword("CASE"); return CASE;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 73 "main.l"
+#line 71 "main.l"
 {tokenKeyword("CONST"); return CONST;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 74 "main.l"
+#line 72 "main.l"
 {tokenKeyword("CONTINUE"); return CONTINUE;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 75 "main.l"
+#line 73 "main.l"
 {tokenKeyword("DO"); return DO;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 76 "main.l"
+#line 74 "main.l"
 {tokenKeyword("ELSE"); return ELSE;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 77 "main.l"
+#line 75 "main.l"
 {tokenKeyword("END"); return END;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 78 "main.l"
+#line 76 "main.l"
 {tokenKeyword("EXIT"); return EXIT;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 79 "main.l"
+#line 77 "main.l"
 {tokenKeyword("FALSE"); yylval.bval = 0; return BOOL_CON;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 80 "main.l"
+#line 78 "main.l"
 {tokenKeyword("FOR"); return FOR;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 81 "main.l"
+#line 79 "main.l"
 {tokenKeyword("FN"); return FN;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 82 "main.l"
+#line 80 "main.l"
 {tokenKeyword("IF"); return IF;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 83 "main.l"
+#line 81 "main.l"
 {tokenKeyword("IN"); return IN;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 84 "main.l"
+#line 82 "main.l"
 {tokenKeyword("INTEGER"); return INTEGER;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 85 "main.l"
+#line 83 "main.l"
 {tokenKeyword("LOOP"); return LOOP;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 86 "main.l"
+#line 84 "main.l"
 {tokenKeyword("MODULE"); return MODULE;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 87 "main.l"
+#line 85 "main.l"
 {tokenKeyword("PRINT"); return PRINT;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 88 "main.l"
+#line 86 "main.l"
 {tokenKeyword("PRINTLN"); return PRINTLN;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 89 "main.l"
+#line 87 "main.l"
 {tokenKeyword("PROCEDURE"); return PROCEDURE;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 90 "main.l"
+#line 88 "main.l"
 {tokenKeyword("REPEAT"); return REPEAT;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 91 "main.l"
+#line 89 "main.l"
 {tokenKeyword("RETURN"); return RETURN;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 92 "main.l"
+#line 90 "main.l"
 {tokenKeyword("REAL"); return REAL;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 93 "main.l"
+#line 91 "main.l"
 {tokenKeyword("STRING"); return STRING;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 94 "main.l"
+#line 92 "main.l"
 {tokenKeyword("RECORD"); return RECORD;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 95 "main.l"
+#line 93 "main.l"
 {tokenKeyword("THEN"); return THEN;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 96 "main.l"
+#line 94 "main.l"
 {tokenKeyword("TRUE"); yylval.bval = 1; return BOOL_CON;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 97 "main.l"
+#line 95 "main.l"
 {tokenKeyword("TYPE"); return TYPE;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 98 "main.l"
+#line 96 "main.l"
 {tokenKeyword("USE"); return USE;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 99 "main.l"
+#line 97 "main.l"
 {tokenKeyword("VAR"); return VAR;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 100 "main.l"
+#line 98 "main.l"
 {tokenKeyword("UTIL"); return UTIL;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 101 "main.l"
+#line 99 "main.l"
 {tokenKeyword("WHILE"); return WHILE;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 102 "main.l"
+#line 100 "main.l"
 {tokenKeyword("R"); return WHILE;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 103 "main.l"
+#line 101 "main.l"
 {LIST; return OF;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 105 "main.l"
+#line 103 "main.l"
 {
 		tokenString(id,yytext);
 		yylval.cval = yytext;
@@ -1187,7 +1185,7 @@ YY_RULE_SETUP
 case 53:
 /* rule 53 can match eol */
 YY_RULE_SETUP
-#line 112 "main.l"
+#line 110 "main.l"
 {
 		char* tmp = (char*)malloc(sizeof(char)*(yyleng-2));
 		for(int i = 1; i < yyleng - 1;i++)
@@ -1200,7 +1198,7 @@ YY_RULE_SETUP
 case 54:
 /* rule 54 can match eol */
 YY_RULE_SETUP
-#line 121 "main.l"
+#line 119 "main.l"
 {
 		LIST;
 		linenum++;
@@ -1211,7 +1209,7 @@ YY_RULE_SETUP
 case 55:
 /* rule 55 can match eol */
 YY_RULE_SETUP
-#line 129 "main.l"
+#line 127 "main.l"
 {
 		LIST;
 		linenum++;
@@ -1221,12 +1219,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 136 "main.l"
+#line 134 "main.l"
 {LIST;}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 138 "main.l"
+#line 136 "main.l"
 {
 		token(yytext);
 		printf("%d: %s\n", linenum+1, buf);
@@ -1236,10 +1234,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 145 "main.l"
+#line 143 "main.l"
 ECHO;
 	YY_BREAK
-#line 1243 "lex.yy.c"
+#line 1241 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(commentState):
 	yyterminate();
@@ -2241,7 +2239,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 145 "main.l"
+#line 143 "main.l"
 
 
 

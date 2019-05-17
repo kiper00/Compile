@@ -1,6 +1,4 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
 #include "y.tab.h"
 #define token(t) {LIST; printf("<'%s'>\n",t);}
 #define tokenKeyword(t) {LIST; printf("<%s>\n",t);}

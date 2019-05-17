@@ -154,13 +154,13 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 89 "parse.y" /* yacc.c:1909  */
+#line 9 "parse.y" /* yacc.c:1909  */
 
 	int ival;
 	double dval;
 	int bval;
-	char *cval;
-	int type;
+	char* cval;
+	struct SymbolTable* tval;
 
 #line 166 "y.tab.h" /* yacc.c:1909  */
 };
