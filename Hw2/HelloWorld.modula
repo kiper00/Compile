@@ -1,0 +1,17 @@
+(* Hello World Example *)
+module HelloWorld
+// constants
+const a = 5;
+// variables
+var c: integer;
+	procedure add(a:integer, b:integer) : integer
+	begin
+  	return ;
+	end add;
+begin
+  // Print text to the console
+  print "Hello World";
+  print "Hello World";
+
+end HelloWorld.
+
