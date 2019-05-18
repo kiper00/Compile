@@ -1,7 +1,7 @@
 %{
 #include "SymbolTable.h"
 #define Trace(t)     if(debug){printf(t); printf("\n");}
-int debug = 0;
+
 
 %}
 
@@ -10,8 +10,9 @@ int debug = 0;
 	int ival;
 	double dval;
 	int bval;
-	char* cval;
+	char *cval;
 	struct SymbolTable* tval;
+	struct 	FuncInfo* fval;
 }
 
 /* token */
@@ -26,8 +27,9 @@ int debug = 0;
 
 /* type */
 %type <ival> var_type
-%type <cval> ID  
-%type <tval> var_decl
+%type <cval> ID
+%type <tval> var_decl var_ID con_Var const_glo const_loc array
+%type <fval> fun_var
 
 /* precedence */
 %left OR
@@ -40,21 +42,21 @@ int debug = 0;
 %nonassoc UMINUS
 
 %%
-program:        MODULE ID BEG statement END ID {Trace("End Parse");dump();}
-		|MODULE ID program_decl BEG statement END ID {Trace("End Parse");dump();};
+program:        MODULE var_ID BEG statement END var_ID {Trace("End Parse");dump();}
+		|MODULE var_ID program_decl BEG statement END var_ID {Trace("End Parse");dump();};
 
 program_decl:	fun
 		|var_delc_glo
 		|var_delc_glo fun;
 
-var_delc_glo:	CONST const_glo  
-		|VAR var_glo
-		|array
+var_delc_glo:	CONST const_glo  {Trace("const 2 delc+glo");}
+		|VAR var_glo {Trace("var 2 delc+glo");}
+		|array	{Trace("arr 2 delc+glo"); $1->isglobal = 0;}
 		|var_delc_glo var_delc_glo;
 
 var_delc_loc: 	CONST const_loc  
 		|VAR var_loc
-		|array
+		|array {$1->isglobal = 1;}
 		|var_delc_loc var_delc_loc;
 
 
@@ -64,19 +66,19 @@ statement:	statement statement
 		|condition
 		|proc_invo;
 
-simple:		ID SET expression';'
-		|ID'['INT_CON']'SET expression';'
-		|READ ID';'	
+simple:		var_ID SET expression';'
+		|var_ID'['INT_CON']'SET expression';'
+		|READ var_ID';'	
 		|PRINT expression';' {Trace("PRINT ID");}
 		|PRINTLN expression';' {Trace("PRINTLN");}
 		|RETURN';'
 		|RETURN expression';';
 
 
-expression:	ID
+expression:	var_ID
 		|con_Var
 		|fun_invo
-		|ID'['INT_CON']'
+		|var_ID'['INT_CON']'
 		|'-'expression %prec UMINUS
 		|expression'+'expression
 		|expression'-'expression
@@ -96,19 +98,53 @@ expression:	ID
 comma_exp:	expression','expression
 		|comma_exp','expression;
 
-proc_invo:	ID'('')'';'
-		|ID'('comma_exp')'';';
+proc_invo:	var_ID'('')'';'
+		|var_ID'('comma_exp')'';';
 
-fun_invo:	ID'('')'
-		|ID'('comma_exp')';
+fun_invo:	var_ID'('')'
+		|var_ID'('comma_exp')';
 	
-fun:		PROCEDURE ID fun_var BEG statement END ID ';' {Trace("PROCEDURE");}
-		|PROCEDURE ID fun_var var_delc_loc BEG statement END ID ';' {Trace("PROCEDURE");};
+fun:		fun fun
+		|PROCEDURE var_ID fun_var BEG statement END var_ID ';' {Trace("PROCEDURE");
+			if(strcmp($2->id,$7->id) != 0) yyerror("PROCEDURE ID error");
+			insertLocalToFunc($3);
+			if(lookup($2->id) == -1) insertFun($3,$2->id);
+			else	yyerror("ID repeat");
+			
+		}
+		|PROCEDURE var_ID fun_var var_delc_loc BEG statement END var_ID ';' {Trace("PROCEDURE");
+			if(strcmp($2->id,$8->id) != 0) yyerror("PROCEDURE ID error");
+			insertLocalToFunc($3);
+			if(lookup($2->id) == -1) insertFun($3,$2->id);
+			else	yyerror("Func ID repeat");
+			
+		};
 
-fun_var:	'(' ')' {Trace("NULL var");}
-		|'(' var_decl {Trace("1 var");}
-		|fun_var ',' var_decl {Trace("more var");}
-		|fun_var ')' ':' var_type {Trace("End fun Var");};
+fun_var:	'(' ')' ':' var_type  {
+			Trace("Function no var"); 
+			$$ = createFun();
+			$$->returnType = $4;
+		}
+		|'(' var_decl {
+			Trace("Function add var"); $$ = createFun(); 
+			if(lookup($2->id) == -1)
+				insertFunVar($2);
+			else
+				yyerror("ID repeat");
+		}
+		|fun_var ',' var_decl {
+			Trace("more var");
+			if(lookup($3->id) == -1)
+				insertFunVar($3);
+			else
+				yyerror("ID repeat");
+			$$ = $1;
+		}
+		|fun_var ')' ':' var_type {
+			Trace("End fun Var");
+			$1->returnType = $4;
+			$$ = $1;
+		};
 
 loop:		WHILE '(' expression ')' DO END';'
 		|WHILE '(' expression ')' DO statement END';';
@@ -120,43 +156,72 @@ condition:	IF '(' expression ')' THEN END
 		|IF '(' expression ')' THEN ELSE statement END
 		|IF '(' expression ')' THEN statement ELSE statement END;
 
+array:		var_ID ':' ARRAY '[' INT_CON ',' INT_CON ']' OF var_type';'{
+			if(lookup($1->id)!= -1) yyerror("ID repeat");
+			if($7 <= $5) yyerror("Array Range Erroe");
+			$1->type = 4;
+			$1->isvar = 2;
+			$1->aval = $10;
+			$1->arr1 = $5;
+			$1->arr2 = $7;
+			$$ = $1;
+			insertArr($1);
+		};
+
 const_glo:	const_glo const_glo
-		|ID '=' con_Var ';';
+		|var_ID '=' con_Var ';'{
+			Trace("insertConst glo");
+			if(lookup($1->id) == -1)
+				insertConst($3,$1->id,0);
+			else
+				yyerror("ID repeat");
+		};
 
 const_loc:	const_loc const_loc
-		|ID '=' con_Var ';';
-
-array:		ID ':' ARRAY '[' INT_CON ',' INT_CON ']' OF var_type';';
+		|var_ID '=' con_Var ';'{
+			Trace("insertConst loc");
+			if(lookup($1->id) == -1)
+				insertConst($3,$1->id,1);
+			else
+				yyerror("ID repeat");
+		};
 
 var_glo:	var_glo var_glo
 		|var_decl ';'{
 			Trace("insertVar glo");
-			insertVar($1);
+			if(lookup($1->id) == -1)
+				insertVar($1,0);
+			else
+				yyerror("ID repeat");
 		};
 
 var_loc:	var_loc var_loc
 		|var_decl ';'{
 			Trace("insertVar loc");
-			insertVar($1);
+			if(lookup($1->id) == -1)
+				insertVar($1,1);
+			else
+				yyerror("ID repeat");
+
 		};
 
-var_decl:	ID ':' var_type 
-		{	Trace("Announce Var");
-			if(lookup("aaa") == -1)
-				$$ = tmpVar($1,$3);
-			else
-				yyerror("ID:%s conflict",$1);
+var_decl:	var_ID ':' var_type {	
+			Trace("Announce Var");
+			$$ = tmpVar($1->id,$3);
 		};
+
+
+var_ID:		ID{ $$ = tmpVar($1,-1);};
 
 var_type:	INTEGER 	{Trace("int"); 	 $$ = 0;}
 		|REAL 		{Trace("real");  $$ = 1;}
 		|STRING 	{Trace("string");$$ = 2;}
 		|BOOLEAN 	{Trace("bool");	 $$ = 3;};
 
-con_Var:	INT_CON
-		|REAL_CON
-		|STR_CON
-		|BOOL_CON;
+con_Var:	INT_CON		{ $$ = tmpConInt($1);}
+		|REAL_CON	{ $$ = tmpConReal($1);}
+		|STR_CON	{ $$ = tmpConStr($1);}
+		|BOOL_CON	{ $$ = tmpConBool($1);};	
 %%
 
 int yyerror(char *s){   

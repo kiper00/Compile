@@ -12,8 +12,6 @@ var c: integer;
     
 // procedure declaration
 procedure add(a:integer, b:integer) : integer
-// constants
-const a = 5;
 begin
   return a+b;
 end add;

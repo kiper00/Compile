@@ -159,10 +159,11 @@ union YYSTYPE
 	int ival;
 	double dval;
 	int bval;
-	char* cval;
+	char *cval;
 	struct SymbolTable* tval;
+	struct 	FuncInfo* fval;
 
-#line 166 "y.tab.h" /* yacc.c:1909  */
+#line 167 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
