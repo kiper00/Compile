@@ -613,10 +613,10 @@ char *yytext;
 #line 1 "main.l"
 #line 2 "main.l"
 #include "y.tab.h"
-#define token(t) {LIST; printf("<'%s'>\n",t);}
+#define token(t) {LIST; /*printf("<'%s'>\n",t);*/}
 #define tokenKeyword(t) {LIST; printf("<%s>\n",t);}
-#define tokenInteger(t) {LIST; printf("<int:%d>\n",t);}
-#define tokenString(t,s) {LIST; printf("<%s:%s>\n",#t,s);}
+#define tokenInteger(t) {LIST; /*printf("<int:%d>\n",t);*/}
+#define tokenString(t,s) {LIST; /*printf("<%s:%s>\n",#t,s);*/}
 
 #define MAX_LINE_LENG 256
 #define LIST strcat(buf,yytext)
@@ -964,7 +964,7 @@ YY_RULE_SETUP
 case 10:
 YY_RULE_SETUP
 #line 58 "main.l"
-{token('<>'); return RAL; }
+{token('<>'); return NEQ; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
@@ -1165,7 +1165,7 @@ YY_RULE_SETUP
 case 50:
 YY_RULE_SETUP
 #line 100 "main.l"
-{tokenKeyword("R"); return WHILE;}
+{tokenKeyword("R"); return READ;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP

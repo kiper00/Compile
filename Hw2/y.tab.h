@@ -46,7 +46,7 @@ extern int yydebug;
   enum yytokentype
   {
     SET = 258,
-    RAL = 259,
+    NEQ = 259,
     LE = 260,
     GE = 261,
     AND = 262,
@@ -99,7 +99,7 @@ extern int yydebug;
 #endif
 /* Tokens.  */
 #define SET 258
-#define RAL 259
+#define NEQ 259
 #define LE 260
 #define GE 261
 #define AND 262

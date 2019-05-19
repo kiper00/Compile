@@ -1,9 +1,9 @@
 %{
 #include "y.tab.h"
-#define token(t) {LIST; printf("<'%s'>\n",t);}
+#define token(t) {LIST; /*printf("<'%s'>\n",t);*/}
 #define tokenKeyword(t) {LIST; printf("<%s>\n",t);}
-#define tokenInteger(t) {LIST; printf("<int:%d>\n",t);}
-#define tokenString(t,s) {LIST; printf("<%s:%s>\n",#t,s);}
+#define tokenInteger(t) {LIST; /*printf("<int:%d>\n",t);*/}
+#define tokenString(t,s) {LIST; /*printf("<%s:%s>\n",#t,s);*/}
 
 #define MAX_LINE_LENG 256
 #define LIST strcat(buf,yytext)
@@ -55,7 +55,7 @@ comment 	\/\/[^\n]+\n
 
  /* two-character token */
 ":="		{token(':='); return SET; }
-"<>"    	{token('<>'); return RAL; }
+"<>"    	{token('<>'); return NEQ; }
 "<="        	{token('<='); return LE; }
 ">="        	{token('>='); return GE; }
 "&&"        	{token('&&'); return AND; }
@@ -97,7 +97,7 @@ comment 	\/\/[^\n]+\n
 "var"		{tokenKeyword("VAR"); return VAR;}
 "util"		{tokenKeyword("UTIL"); return UTIL;}
 "while"		{tokenKeyword("WHILE"); return WHILE;}
-"read"		{tokenKeyword("R"); return WHILE;}
+"read"		{tokenKeyword("R"); return READ;}
 "of"		{LIST; return OF;}
 
 {id}		{
