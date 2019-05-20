@@ -1,12 +1,11 @@
-scanner: lex.yy.o SymbolTable.o
-	gcc -o p lex.yy.o SymbolTable.o -ll
+parser: scanner.o parse.o
+	gcc y.tab.c lex.yy.c -ll -ly
 
-lex.yy.o: main.l
-	lex main.l
-	gcc -c -g lex.yy.c
+scanner.o: main.l
+	flex -o lex.yy.c main.l
 
-main.o: SymbolTable.c SymbolTable.h
-	gcc -c -g SymbolTable.c
+parse.o: parse.y
+	bison -y -d parse.y
 
 clean:
 	rm -f *.o lex.yy.c

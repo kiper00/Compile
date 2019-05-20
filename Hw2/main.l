@@ -1,7 +1,7 @@
 %{
 #include "y.tab.h"
 #define token(t) {LIST; /*printf("<'%s'>\n",t);*/}
-#define tokenKeyword(t) {LIST; printf("<%s>\n",t);}
+#define tokenKeyword(t) {LIST; /*printf("<%s>\n",t);*/}
 #define tokenInteger(t) {LIST; /*printf("<int:%d>\n",t);*/}
 #define tokenString(t,s) {LIST; /*printf("<%s:%s>\n",#t,s);*/}
 

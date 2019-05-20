@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-int debug = 1;
+int debug = 0;
 typedef struct SymbolTable{
 	int 	index;
 	char 	id[256];	// ID name

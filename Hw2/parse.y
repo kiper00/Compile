@@ -69,7 +69,7 @@ statement:	statement statement {Trace("statement Combine");}
 simple:		var_ID SET expression';'{
 			Trace("ID SET exp");
 
-			if(lookup($1->id)==-1) yyerror("ID No define");
+			if(lookup($1->id) == -1) yyerror("ID No define");
 			else $1 = ReturnID($1->id);
 			if($1->isvar == 1) yyerror("Const can't assign");
 			if($1->type != $3->type) yyerror("Type Diff");
@@ -82,14 +82,15 @@ simple:		var_ID SET expression';'{
 			else if($1->type == 3)
 				strcpy($1->cval, $3->cval);
 		}
-		|var_ID'['INT_CON']'SET expression';'{
+		|var_ID'['expression']'SET expression';'{
 			Trace("ID[i] SET EXP");
-			if(lookup($1->id)==-1) yyerror("ID No define");
+			if(lookup($1->id) == -1) yyerror("ID No define");
 			else $1 = ReturnID($1->id);
 			if($1->type != 4) yyerror("Not Array Type");
-			if($1->arr1 > $3 || $3 > $1->arr2) yyerror("Array Out Of Range");
+			else if($3->type != 0) yyerror("index not int");
+			if($1->arr1 > $3->ival || $3->ival > $1->arr2) yyerror("Array Out Of Range");
 			if($1->aval != $6->type) yyerror("Type Diff");
-			$1 = ReturnArrItem($1->arr,$3);
+			$1 = ReturnArrItem($1->arr,$3->ival);
 			if($1->type == 0)
 				$1->ival = $6->ival;
 			else if($1->type == 1)
@@ -142,13 +143,14 @@ expression:	var_ID	{
 			$$->next == NULL;
 			$$->type = $1->fval->returnType;
 		}
-		|var_ID'['INT_CON']'{
+		|var_ID'['expression']'{
 			Trace("arr 2 exp");
 			if(lookup($1->id)==-1) yyerror("ID No define");
 			else $1 = ReturnID($1->id);
 			if($1->type != 4) yyerror("Not Array Type");
-			if($1->arr1 > $3 || $3 > $1->arr2) yyerror("Array Out Of Range");
-			$$ = ReturnArrItem($1->arr,$3);
+			else if($3->type != 0) yyerror("index not int");
+			if($1->arr1 > $3->ival || $3->ival > $1->arr2) yyerror("Array Out Of Range");
+			$$ = ReturnArrItem($1->arr,$3->ival);
 		}
 		|'-'expression %prec UMINUS	{
 			Trace("-exp");
