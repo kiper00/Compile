@@ -7,7 +7,7 @@ typedef struct SymbolTable{
 	char 	id[256];	// ID name
 	int 	type;		// ID type
 	int 	isglobal;	// global = 0, local = 1
-	int 	isvar;		// variable = 0, const = 1, array = 2, func = 3, func delc = 4, return tmp = 5
+	int 	isvar;		// variable = 0, const = 1, array = 2, function = 3, function's delc = 4, return type tmp save = 5
 	struct 	SymbolTable* next;
 
 				// type =-1, tmp save data
@@ -21,7 +21,7 @@ typedef struct SymbolTable{
 	int	arr2;		// Array num 2
 	struct	SymbolTable* arr; // Array Link
 
-	struct 	FuncInfo* fval;	// type = 5, function
+	struct 	FuncInfo* fval;	// type = 5, function link
 	int 	delcNum;	// Decl in ()
 
 }SymbolTable;
@@ -132,9 +132,8 @@ SymbolTable* end;
 	}
 
 	int CompareFuncReturnType(FuncInfo* fun){
+	// Compare return type == function type ? true = 1 : false = 0
 		int type = fun->returnType;
-		if(fun->lead == NULL)
-			return 1;
 		if(fun->lead->next == NULL && fun->lead->isvar == 5){
 			if(fun->lead->type == type){
 				fun->lead = NULL;
@@ -197,16 +196,17 @@ SymbolTable* end;
 	
 	int lookup(char* input){
 	// Returns index of the entry for string s, or nil if s is not found.
+	// Find == 1 ,not == 0;
 		if(lead == NULL)
-			return -1;
+			return 0;
 		SymbolTable* table = lead;
 		
 		while(table != NULL){
 			if(strcmp(table->id, input) == 0)
-				return table->index;
+				return 1;
 			table = table->next;
 		}
-		return -1;
+		return 0;
 	}
 
 /* Insert Block */
@@ -386,15 +386,15 @@ SymbolTable* end;
 				else if (table->isvar == 1){
 					printf("const\t");
 					if(table->type == 0)
-						printf("%d\t",table->ival);
+						printf("integer\t%d\t",table->ival);
 					else if(table->type == 1)
-						printf("%f\t",table->dval);
+						printf("real\t%f\t",table->dval);
 					else if(table->type == 2 && table->bval == 1)
-						printf("true\t");
+						printf("boolean\ttrue\t");
 					else if(table->type == 2 && table->bval == 0)
-						printf("false\t");
+						printf("boolean\tfalse\t");
 					else
-						printf("%s\t",table->cval);
+						printf("string\t%s\t",table->cval);
 					printf("\n");	
 				}
 				else if (table->isvar == 2){
@@ -422,10 +422,6 @@ SymbolTable* end;
 					else if(table->type == 4)
 						printf("array\t");
 					printf("\n");
-				}	
-				else if(table->isvar == 5){
-					printf("return\n");
-
 				}	
 				table = table->next;
 			}
@@ -459,15 +455,15 @@ SymbolTable* end;
 				else if (table->isvar == 1){
 					printf("const\t");
 					if(table->type == 0)
-						printf("%d\t",table->ival);
+						printf("integer\t%d\t",table->ival);
 					else if(table->type == 1)
-						printf("%f\t",table->dval);
+						printf("real\t%f\t",table->dval);
 					else if(table->type == 2 && table->bval == 1)
-						printf("true\t");
+						printf("boolean\ttrue\t");
 					else if(table->type == 2 && table->bval == 0)
-						printf("false\t");
+						printf("boolean\tfalse\t");
 					else
-						printf("%s\t",table->cval);
+						printf("string\t%s\t",table->cval);
 					printf("\n");	
 				}			
 				else if (table->isvar == 2){
@@ -496,18 +492,6 @@ SymbolTable* end;
 						printf("void\n");
 					dumpFunc(table->fval);
 				}
-				/*else if (table->isvar == 4){
-					printf("delc\t");
-					if(table->type == 0)
-						printf("integer\t");
-					else if(table->type == 1)
-						printf("real\t");
-					else if(table->type == 2)
-						printf("boolean\t");
-					else if(table->type == 3)
-						printf("string\t");
-					printf("\n");
-				}*/
 				table = table->next;
 			}
 		}
