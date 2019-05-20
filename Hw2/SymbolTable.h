@@ -188,10 +188,10 @@ SymbolTable* end;
 		SymbolTable* l = li;
 
 		while(r != NULL && r->isvar == 4 ){
-			if(r->type != l->type)	return -1;
+			if(r->type != l->type)	return 0;
 			r = r->next;	l = l->next;
 		}
-		return 2;
+		return 1;
 	}
 	
 	int lookup(char* input){

@@ -287,7 +287,7 @@ proc_invo:	var_ID';'{
 			if(lookup($1->id) == 0) yyerror("ID No define");
 			else $1 = ReturnID($1->id);
 			if($1->delcNum != SymbolTableLength($3)) yyerror("Delc variable numuber not correct");
-			if(CompareType($1->fval->lead,$3)==-1) yyerror("Delc variable type not correct");
+			if(CompareType($1->fval->lead,$3) == 0) yyerror("Delc variable type not correct");
 		};
 
 fun_invo:	var_ID'('comma_exp')'{
@@ -295,7 +295,7 @@ fun_invo:	var_ID'('comma_exp')'{
 			if(lookup($1->id) == 0) yyerror("ID No define");
 			else $$ = ReturnID($1->id);
 			if($$->delcNum != SymbolTableLength($3)) yyerror("Delc variable numuber not correct");
-			if(CompareType($$->fval->lead,$3)==-1) yyerror("Delc variable type not correct");
+			if(CompareType($$->fval->lead,$3) == 0) yyerror("Delc variable type not correct");
 		};
 	
 fun:		fun fun { Trace("Function combine")}
