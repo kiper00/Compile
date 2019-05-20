@@ -7,7 +7,7 @@ typedef struct SymbolTable{
 	char 	id[256];	// ID name
 	int 	type;		// ID type
 	int 	isglobal;	// global = 0, local = 1
-	int 	isvar;		// variable = 0, const = 1, array = 2, func = 3
+	int 	isvar;		// variable = 0, const = 1, array = 2, func = 3, func delc = 4, return tmp = 5
 	struct 	SymbolTable* next;
 
 				// type =-1, tmp save data
@@ -27,7 +27,7 @@ typedef struct SymbolTable{
 }SymbolTable;
 
 typedef struct FuncInfo{
-	int returnType;		// Return's type = SymbolTable's type
+	int returnType;		// Return's type = SymbolTable's type, 6 = void
 	struct SymbolTable* lead;	// Record variable's name
 }FuncInfo;
 
@@ -130,6 +130,31 @@ SymbolTable* end;
 			table = table->next;
 		}
 	}
+
+	int CompareFuncReturnType(FuncInfo* fun){
+		int type = fun->returnType;
+		if(fun->lead == NULL)
+			return 1;
+		if(fun->lead->next == NULL && fun->lead->isvar == 5){
+			if(fun->lead->type == type){
+				fun->lead = NULL;
+				return 1;
+			}
+			return 0;
+		}
+		SymbolTable* t = fun->lead;
+		while(t != NULL){
+			if(t->next == NULL)
+				break;
+			if(t->next->isvar == 5){
+				if(t->next->type != type) return 0;
+				else t->next = t->next->next;
+			}
+			else t = t->next;
+		}
+		return 1;
+	}
+
 	int FuncDelcNum(SymbolTable* in){
 	// Calc how function delcare var
 		SymbolTable* t = in;
@@ -150,7 +175,7 @@ SymbolTable* end;
 		}
 		return count;
 	}
-	void ConnectSumbol(SymbolTable* in, SymbolTable* con){
+	void ConnectSymbol(SymbolTable* in, SymbolTable* con){
 	// Connect symbol to another
 		SymbolTable* t = in;
 		while(t->next != NULL)
@@ -175,6 +200,7 @@ SymbolTable* end;
 		if(lead == NULL)
 			return -1;
 		SymbolTable* table = lead;
+		
 		while(table != NULL){
 			if(strcmp(table->id, input) == 0)
 				return table->index;
@@ -285,6 +311,15 @@ SymbolTable* end;
 		end = table;
 	}
 
+	void insertReturn(SymbolTable* table){
+		if(lead == NULL)
+			create();
+		table->index = end->index + 1;	
+		table->isglobal = 1;
+		table->isvar = 5;
+		end->next = table;
+		end = table;
+	}
 	void insertConst(SymbolTable* table, char* id, int isglobal){
 	// Insert const into symbol table
 		if(lead == NULL)
@@ -387,7 +422,11 @@ SymbolTable* end;
 					else if(table->type == 4)
 						printf("array\t");
 					printf("\n");
-				}		
+				}	
+				else if(table->isvar == 5){
+					printf("return\n");
+
+				}	
 				table = table->next;
 			}
 		}
@@ -444,10 +483,20 @@ SymbolTable* end;
 					printf("range[%d,%d]\n",table->arr1,table->arr2);
 				}
 				else if (table->isvar == 3){
-					printf("function\t%d\n",table->delcNum);
+					printf("func\t");
+					if(table->fval->returnType == 0)
+						printf("integer\n");
+					else if(table->fval->returnType == 1)
+						printf("real\n");
+					else if(table->fval->returnType == 2)
+						printf("boolean\n");
+					else if(table->fval->returnType == 3)
+						printf("string\n");
+					else if(table->fval->returnType == 6)
+						printf("void\n");
 					dumpFunc(table->fval);
 				}
-				else if (table->isvar == 4){
+				/*else if (table->isvar == 4){
 					printf("delc\t");
 					if(table->type == 0)
 						printf("integer\t");
@@ -458,7 +507,7 @@ SymbolTable* end;
 					else if(table->type == 3)
 						printf("string\t");
 					printf("\n");
-				}
+				}*/
 				table = table->next;
 			}
 		}

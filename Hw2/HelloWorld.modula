@@ -6,15 +6,15 @@ module Example
 
 // variables
 var c: integer;
-    
-// procedure declaration
-procedure sas : integer
+z : real;
+// procedure declaration : integer
+procedure sas 
 begin
   return ;
 end sas;
 procedure add(a:integer, b:integer) : integer
 begin
-  return a+b;
+  return z;
 end add;
     
 // main function
@@ -25,7 +25,7 @@ begin
   else 
     print c;
   end;
-sas;
+	
   println "Hello World";
 end Example.
 

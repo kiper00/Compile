@@ -71,7 +71,6 @@ simple:		var_ID SET expression';'{
 
 			if(lookup($1->id)==-1) yyerror("ID No define");
 			else $1 = ReturnID($1->id);
-			printf("%d %d",$1->type, $3->type);
 			if($1->isvar == 1) yyerror("Const can't assign");
 			if($1->type != $3->type) yyerror("Type Diff");
 			if($1->type == 0)
@@ -103,14 +102,37 @@ simple:		var_ID SET expression';'{
 		|READ var_ID';'	{Trace("READ ID"); if(lookup($2->id)==-1) yyerror("ID No define"); }
 		|PRINT expression';' {Trace("PRINT");}
 		|PRINTLN expression';' {Trace("PRINTLN");}
-		|RETURN';'{Trace("RETURN");}
-		|RETURN expression';'{Trace("RETURN exp");};
+		|RETURN';'{
+			Trace("RETURN");
+			SymbolTable* t = (SymbolTable*)malloc(sizeof(SymbolTable));;
+			t = tmpVar("tmp",-1);
+			t->isvar = 5;
+			t->type = 6;
+			insertReturn(t);
+		}
+		|RETURN expression';'{
+			Trace("RETURN exp");
+			SymbolTable* t = (SymbolTable*)malloc(sizeof(SymbolTable));;
+			t = tmpVar("tmp",-1);
+			t->isvar = 5;
+			printf("%d\n",$2->type);
+			t->type = $2->type;
+			insertReturn(t);
+		};
 
 
 expression:	var_ID	{
 			Trace("ID 2 exp");
 			if(lookup($1->id)==-1) yyerror("ID No define");
-			else $$ = ReturnID($1->id);
+			else $1 = ReturnID($1->id);
+			$$ =  (SymbolTable*)malloc(sizeof(SymbolTable));
+			copyVar($$,$1);
+			$$->next == NULL;
+			if($1->type == 5){
+				if($1->delcNum != 0) yyerror("Delc variable numuber not correct");
+				$$->type = $1->fval->returnType;
+				if($$->type == 6) yyerror("Use void type calc");
+			}
 		}
 		|con_Var	{ Trace("con 2 exp"); $$ = $1;}
 		|fun_invo	{ 
@@ -274,7 +296,7 @@ comma_exp:	expression{
 			SymbolTable* t = tmpVar("tmp",-1);
 			copyVar(t,$3);
 			t->next = NULL;
-			ConnectSumbol($1,t);
+			ConnectSymbol($1,t);
 			$$ = $1;
 		};
 
@@ -288,18 +310,11 @@ proc_invo:	var_ID';'{
 			Trace("proc_invo var");
 			if(lookup($1->id)==-1) yyerror("ID No define");
 			else $1 = ReturnID($1->id);
-				printf("%d,%d\n",$1->delcNum , SymbolTableLength($3));
 			if($1->delcNum != SymbolTableLength($3)) yyerror("Delc variable numuber not correct");
 			if(CompareType($1->fval->lead,$3)==-1) yyerror("Delc variable type not correct");
 		};
 
-fun_invo:	var_ID'('')'{
-			Trace("fun_invo null");
-			if(lookup($1->id)==-1) yyerror("ID No define");
-			else $$ = ReturnID($1->id);
-			if($$->delcNum != 0) yyerror("Delc variable numuber not correct");
-		}
-		|var_ID'('comma_exp')'{
+fun_invo:	var_ID'('comma_exp')'{
 			Trace("fun_invo var");
 			if(lookup($1->id)==-1) yyerror("ID No define");
 			else $$ = ReturnID($1->id);
@@ -311,42 +326,45 @@ fun:		fun fun
 		|PROCEDURE var_ID fun_var BEG statement END var_ID ';' {Trace("PROCEDURE");
 			if(strcmp($2->id,$7->id) != 0) yyerror("PROCEDURE ID error");
 			insertLocalToFunc($3);
+			if(CompareFuncReturnType($3) == 0) yyerror("Return type error");
 			if(lookup($2->id) == -1) insertFun($3,$2->id);
-			else	yyerror("ID repeat");
-			
+			else yyerror("Func ID repeat");
 		}
 		|PROCEDURE var_ID fun_var var_delc_loc BEG statement END var_ID ';' {Trace("PROCEDURE");
-			Trace("END");
 			if(strcmp($2->id,$8->id) != 0) yyerror("PROCEDURE ID error");
 			insertLocalToFunc($3);
+			if(CompareFuncReturnType($3) == 0) yyerror("Return type error");
 			if(lookup($2->id) == -1) insertFun($3,$2->id);
-			else	yyerror("Func ID repeat");
-			
+			else yyerror("Func ID repeat");
 		};
 
-fun_var:	 ':' var_type  {
+fun_var:	{	Trace("Function no return & no var"); 
+			$$ = createFun();
+			$$->returnType = 6;}
+		|':' var_type  {
 			Trace("Function no var"); 
 			$$ = createFun();
 			$$->returnType = $2;
 		}
 		|'(' var_decl {
 			Trace("Function add var"); $$ = createFun(); 
-			if(lookup($2->id) == -1)
-				insertFunVar($2);
-			else
-				yyerror("ID repeat");
+			if(lookup($2->id) == -1) insertFunVar($2);
+			else yyerror("ID repeat");
 		}
 		|fun_var ',' var_decl {
 			Trace("more var");
-			if(lookup($3->id) == -1)
-				insertFunVar($3);
-			else
-				yyerror("ID repeat");
+			if(lookup($3->id) == -1) insertFunVar($3);
+			else yyerror("ID repeat");
 			$$ = $1;
 		}
 		|fun_var ')' ':' var_type {
 			Trace("End fun Var");
 			$1->returnType = $4;
+			$$ = $1;
+		}
+		|fun_var ')'{
+			Trace("End fun Var & void");
+			$1->returnType = 6;
 			$$ = $1;
 		};
 
@@ -376,10 +394,8 @@ const_glo:	const_glo const_glo
 		}
 		|var_ID '=' con_Var ';'{
 			Trace("insertConst glo");
-			if(lookup($1->id) == -1)
-				insertConst($3,$1->id,0);
-			else
-				yyerror("ID repeat");
+			if(lookup($1->id) == -1) insertConst($3,$1->id,0);
+			else yyerror("ID repeat");
 		};
 
 const_loc:	const_loc const_loc
@@ -389,10 +405,8 @@ const_loc:	const_loc const_loc
 		}
 		|var_ID '=' con_Var ';'{
 			Trace("insertConst loc");
-			if(lookup($1->id) == -1)
-				insertConst($3,$1->id,1);
-			else
-				yyerror("ID repeat");
+			if(lookup($1->id) == -1) insertConst($3,$1->id,1);
+			else yyerror("ID repeat");
 
 		};
 
@@ -419,28 +433,20 @@ var_loc:	var_loc var_loc
 
 var_com:	var_ID{
 			Trace("var com");
-			if(lookup($1->id) == -1)
-				insertVar($1,0);
-			else
-				yyerror("ID repeat");
+			if(lookup($1->id) == -1) insertVar($1,0);
+			else yyerror("ID repeat");
 		}
 		|var_com ',' var_ID{
 			Trace("var com");
-			if(lookup($3->id) == -1)
-				insertVar($3,0);
-			else
-				yyerror("ID repeat");		
+			if(lookup($3->id) == -1) insertVar($3,0);
+			else yyerror("ID repeat");		
 		}
 		|var_ID ',' var_ID{
 			Trace("var com");
-			if(lookup($1->id) == -1)
-				insertVar($1,0);
-			else
-				yyerror("ID repeat");
-			if(lookup($3->id) == -1)
-				insertVar($3,0);
-			else
-				yyerror("ID repeat");
+			if(lookup($1->id) == -1) insertVar($1,0);
+			else yyerror("ID repeat");
+			if(lookup($3->id) == -1) insertVar($3,0);
+			else yyerror("ID repeat");
 		};
 
 var_decl:	var_ID ':' var_type {	
