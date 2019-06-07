@@ -330,12 +330,12 @@ fun_var:	{	Trace("Function no return & no var");
 			Trace("Function delc var"); 
 			$$ = createFun(); 
 			if(lookupLocal($2->id) == 0) insertFunVar($2);
-			else yyerror("ID repeat");
+			else yyerror("ID repeat1");
 		}
 		|fun_var ',' var_decl {
 			Trace("Function delc var, delc var");
 			if(lookupLocal($3->id) == 0) insertFunVar($3);
-			else yyerror("ID repeat");
+			else yyerror("ID repeat2");
 			$$ = $1;
 		}
 		|fun_var ')' ':' var_type {
@@ -378,7 +378,7 @@ const_glo:	const_glo const_glo {Trace("Const global combine")}
 		|var_ID '=' con_Var ';'{
 			Trace("Const global delcare");
 			if(lookup($1->id) == 0) insertConst($3,$1->id,0);
-			else yyerror("ID repeat");
+			else yyerror("ID repeat3");
 		};
 
 const_loc:	const_loc const_loc {Trace("Const const combine")}
@@ -390,7 +390,7 @@ const_loc:	const_loc const_loc {Trace("Const const combine")}
 		|var_ID '=' con_Var ';'{
 			Trace("Const local delcare");
 			if(lookup($1->id) == 0) insertConst($3,$1->id,1);
-			else yyerror("ID repeat");
+			else yyerror("ID repeat4");
 
 		};
 
@@ -420,12 +420,12 @@ var_loc:	var_loc var_loc {Trace("Variable local combine")}
 var_com:	var_ID{
 			Trace("var commman begin");
 			if(lookup($1->id) == 0) insertVar($1,0);
-			else yyerror("ID repeat");
+			else yyerror("ID repeat5");
 		}
 		|var_com ',' var_ID{
 			Trace("var commman , var");
 			if(lookup($3->id) == 0) insertVar($3,0);
-			else yyerror("ID repeat");		
+			else yyerror("ID repeat6");		
 		};
 
 var_decl:	var_ID ':' var_type {	

@@ -218,7 +218,7 @@ SymbolTable* end;
 		SymbolTable* table = lead;
 		
 		while(table != NULL){
-			if(strcmp(table->id, input) == 0 && table->isglobal == 0)
+			if(strcmp(table->id, input) == 0 && table->isglobal == 1)
 				return 1;
 			table = table->next;
 		}
