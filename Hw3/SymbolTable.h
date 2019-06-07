@@ -285,6 +285,7 @@ SymbolTable* end;
 			table = table->next;
 		}
 		if(needAdd == 1){
+			int index = 0;
 			table = lead;
 			fun->lead = (SymbolTable*)malloc(sizeof(SymbolTable));
 			SymbolTable* f = fun->lead;
@@ -301,6 +302,11 @@ SymbolTable* end;
 				}
 				else
 					table = table->next;
+			}
+			while(f != NULL){
+				f->index = index;
+				f = f->next;
+				index++;
 			}
 		}
 	}

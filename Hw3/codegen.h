@@ -81,12 +81,12 @@ int getFlag(){
 
 /* javaa */
 void genProgramStart(char* filename){
-	LabelInit();
-	name = (char*)malloc(sizeof(char));
-	strcpy(name,filename);
-	char* IO = (char*)malloc(sizeof(char));
-	strcpy(IO,filename);
-	strcat(IO,".jasm");
+    LabelInit();
+    name = (char*)malloc(sizeof(char));
+    strcpy(name,filename);
+    char* IO = (char*)malloc(sizeof(char));
+	  strcpy(IO,filename);
+	  strcat(IO,".jasm");
   	file = fopen(IO,"w");  	
   	fprintf(file,"class %s\n{\n",filename);
 }
@@ -96,70 +96,83 @@ void genProgramEnd(){
 }
 
 void genBlockEnd(){
-  fprintf(file,"\t}\n");
+    fprintf(file,"\t}\n");
 }
 
-void genGlobalVar(char* id){
-  fprintf(file,"\tfield static int %s\n",id);
+void genGlobalVar(){
+    if(lead == NULL)  return;
+    SymbolTable* t = lead->next;
+    while(t != NULL){
+        if(t->type == 0)
+            fprintf(file,"\tfield static int %s\n",id);
+        else if(t->type == 2)
+            fprintf(file,"\tfield static boolean %s\n",id);
+        t = t->next;
+    }
 }
+// void genGlobalInt(char* id){
+//     fprintf(file,"\tfield static int %s\n",id);
+// }
+// void genGlobalBool(char* id){
+//     fprintf(file,"\tfield static boolean %s\n",id);
+// }
 void genGlobalVarWithVal(char* id, int val){
-  fprintf(file,"\tfield static int %s = %d\n",id,val);
+    fprintf(file,"\tfield static int %s = %d\n",id,val);
 }
 
 void genLocalVarWithVal(char* id, int val){
-  fprintf(file,"\t\tistore %s\n",id);
+    fprintf(file,"\t\tistore %s\n",id);
 }
 void genConstStr(char* str){
-  fprintf(file,"\t\tldc \"%s\"\n",str);
+    fprintf(file,"\t\tldc \"%s\"\n",str);
 }
 void genConstInt(int val){
-  fprintf(file,"\t\tsipush %d",val);
+    fprintf(file,"\t\tsipush %d",val);
 }
 
 void genGetGlobalVar(char* id){
-  fprintf(file,"\t\tgetstatic int %s.%s\n",name,id);
+    fprintf(file,"\t\tgetstatic int %s.%s\n",name,id);
 }
 void genGetLocalVar(int idx){
-  fprintf(file,"\t\tiload %d\n",idx);
+    fprintf(file,"\t\tiload %d\n",idx);
 }
 void genSetGlobalVar(char* id){
-  fprintf(file,"\t\tputstatic int %s.%s\n",name,id);
+    fprintf(file,"\t\tputstatic int %s.%s\n",name,id);
 }
 void genSetLocalVar(int idx){
-  fprintf(file,"\t\tistore %s\n",idx);
+    fprintf(file,"\t\tistore %d\n",idx);
 }
 
 void genOperator(char op){
-  switch (op)
-  {
-    case '*': fprintf(file,"\t\timul\n"); break;
-    case '/': fprintf(file,"\t\tidiv\n"); break;
-    case '+': fprintf(file,"\t\tiadd\n"); break;
-    case '-': fprintf(file,"\t\tisub\n"); break;
-    case '~': fprintf(file,"\t\tldc 1\n\t\tixor\n"); break;
-    default:  break;
-  }
-
+    switch (op)
+    {
+      case '*': fprintf(file,"\t\timul\n"); break;
+      case '/': fprintf(file,"\t\tidiv\n"); break;
+      case '+': fprintf(file,"\t\tiadd\n"); break;
+      case '-': fprintf(file,"\t\tisub\n"); break;
+      case '~': fprintf(file,"\t\tldc 1\n\t\tixor\n"); break;
+      default:  break;
+    }
 }
 void genCondOp(int op){
-  fprintf(file,"\t\tisub\n");
-  int lb1 = getLabel();
-  int lb2 = getLabel();
-  switch (op) {
-    case IFLT: fprintf(file,"\t\tiflt"); break;
-    case IFGT: fprintf(file,"\t\tifgt"); break;
-    case IFLE: fprintf(file,"\t\tifle"); break;
-    case IFGE: fprintf(file,"\t\tifge"); break;
-    case IFEQ: fprintf(file,"\t\tifeq"); break;
-    case IFNE: fprintf(file,"\t\tifne"); break;
-    case IAND:  fprintf(file,"\t\tiand"); break;
-    case IOR:   fprintf(file,"\t\tior");  break;
-    default: break;
-  }
-  fprintf(file," L%d\n",lb1);
-  fprintf(file,"\t\ticonst_0\n");
-  fprintf(file,"\t\tgoto L%d\n",lb2);
-  fprintf(file,"\t\ticonst_1\n");
+    fprintf(file,"\t\tisub\n");
+    int lb1 = getLabel();
+    int lb2 = getLabel();
+    switch (op) {
+      case IFLT: fprintf(file,"\t\tiflt"); break;
+      case IFGT: fprintf(file,"\t\tifgt"); break;
+      case IFLE: fprintf(file,"\t\tifle"); break;
+      case IFGE: fprintf(file,"\t\tifge"); break;
+      case IFEQ: fprintf(file,"\t\tifeq"); break;
+      case IFNE: fprintf(file,"\t\tifne"); break;
+      case IAND:  fprintf(file,"\t\tiand"); break;
+      case IOR:   fprintf(file,"\t\tior");  break;
+      default: break;
+    }
+    fprintf(file," L%d\n",lb1);
+    fprintf(file,"\t\ticonst_0\n");
+    fprintf(file,"\t\tgoto L%d\n",lb2);
+    fprintf(file,"\t\ticonst_1\n");
 }
 
 void genMainStart(){

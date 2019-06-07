@@ -1,8 +1,6 @@
 %{
 #include "codegen.h"
 #define Trace(t)     if(debug){printf(t); printf("\n");}
-
-
 %}
 
 /* yylval */
@@ -42,8 +40,8 @@
 %nonassoc UMINUS
 
 %%
-program:        MODULE var_ID {genProgramStart($2->id);} program_decl BEG statement END var_ID {
-			if(strcmp($2->id,$8->id) != 0) yyerror("Module ID No Error");
+program:        MODULE var_ID {genProgramStart($2->id);} program_decl BEG {genMainStart();} statement END {genVoidFuncEnd();} var_ID {
+			if(strcmp($2->id,$9->id) != 0) yyerror("Module ID No Error");
 			Trace("End Parse");dump();
 			genProgramEnd();
 		};
@@ -54,7 +52,7 @@ program_decl:
 		|var_delc_glo fun{Trace("Program has global variable & function delcare");};
 
 var_delc_glo:	CONST const_glo  {Trace("Const global delcare");}
-		|VAR var_glo {Trace("Var global delcare");}
+		|VAR var_glo {Trace("Var global delcare"); genGlobalVar()；}
 		|array	{Trace("Array global delcare"); $1->isglobal = 0;}
 		|var_delc_glo var_delc_glo {Trace("Combine global delcare");};
 
@@ -303,7 +301,8 @@ fun_invo:	var_ID'('comma_exp')'{
 		};
 	
 fun:		fun fun { Trace("Function combine")}
-		|PROCEDURE var_ID fun_var BEG statement END var_ID ';' {Trace("Proceduce Delcare");
+		|PROCEDURE var_ID fun_var BEG statement END var_ID ';' {
+			Trace("Proceduce Delcare");
 			if(strcmp($2->id,$7->id) != 0) yyerror("Proceduce ID error");
 			insertLocalToFunc($3);
 			if(CompareFuncReturnType($3) == 0) yyerror("Return type error");
@@ -330,12 +329,12 @@ fun_var:	{	Trace("Function no return & no var");
 			Trace("Function delc var"); 
 			$$ = createFun(); 
 			if(lookupLocal($2->id) == 0) insertFunVar($2);
-			else yyerror("ID repeat1");
+			else yyerror("ID repeat");
 		}
 		|fun_var ',' var_decl {
 			Trace("Function delc var, delc var");
 			if(lookupLocal($3->id) == 0) insertFunVar($3);
-			else yyerror("ID repeat2");
+			else yyerror("ID repeat");
 			$$ = $1;
 		}
 		|fun_var ')' ':' var_type {
@@ -378,7 +377,7 @@ const_glo:	const_glo const_glo {Trace("Const global combine")}
 		|var_ID '=' con_Var ';'{
 			Trace("Const global delcare");
 			if(lookup($1->id) == 0) insertConst($3,$1->id,0);
-			else yyerror("ID repeat3");
+			else yyerror("ID repeat");
 		};
 
 const_loc:	const_loc const_loc {Trace("Const const combine")}
@@ -390,7 +389,7 @@ const_loc:	const_loc const_loc {Trace("Const const combine")}
 		|var_ID '=' con_Var ';'{
 			Trace("Const local delcare");
 			if(lookup($1->id) == 0) insertConst($3,$1->id,1);
-			else yyerror("ID repeat4");
+			else yyerror("ID repeat");
 
 		};
 
@@ -413,19 +412,18 @@ var_loc:	var_loc var_loc {Trace("Variable local combine")}
 		}
 		|var_com ':' var_type ';'{
 			Trace("Variable local delcare");
-			RedefineType($3,1);
-
+			RedefineType($3,1);	
 		};
 
 var_com:	var_ID{
 			Trace("var commman begin");
 			if(lookup($1->id) == 0) insertVar($1,0);
-			else yyerror("ID repeat5");
+			else yyerror("ID repeat");
 		}
 		|var_com ',' var_ID{
 			Trace("var commman , var");
 			if(lookup($3->id) == 0) insertVar($3,0);
-			else yyerror("ID repeat6");		
+			else yyerror("ID repeat");		
 		};
 
 var_decl:	var_ID ':' var_type {	
