@@ -1,5 +1,5 @@
 %{
-#include "SymbolTable.h"
+#include "codegen.h"
 #define Trace(t)     if(debug){printf(t); printf("\n");}
 
 
@@ -42,7 +42,11 @@
 %nonassoc UMINUS
 
 %%
-program:        MODULE var_ID program_decl BEG statement END var_ID {Trace("End Parse");dump();};
+program:        MODULE var_ID {genProgramStart($2->id);} program_decl BEG statement END var_ID {
+			if(strcmp($2->id,$8->id) != 0) yyerror("Module ID No Error");
+			Trace("End Parse");dump();
+			genProgramEnd();
+		};
 
 program_decl:	
 		|fun {Trace("Program has function delcare");}
@@ -262,7 +266,7 @@ expression:	var_ID	{
 		};
 
 comma_exp:	expression{
-			Trace("exp , OR exp");
+			Trace("(exp ,) OR (exp)");
 			$$ = tmpVar("tmp",-1);
 			copyVar($$,$1);
 			$$->next = NULL;
@@ -325,12 +329,12 @@ fun_var:	{	Trace("Function no return & no var");
 		|'(' var_decl {
 			Trace("Function delc var"); 
 			$$ = createFun(); 
-			if(lookup($2->id) == 0) insertFunVar($2);
+			if(lookupLocal($2->id) == 0) insertFunVar($2);
 			else yyerror("ID repeat");
 		}
 		|fun_var ',' var_decl {
 			Trace("Function delc var, delc var");
-			if(lookup($3->id) == 0) insertFunVar($3);
+			if(lookupLocal($3->id) == 0) insertFunVar($3);
 			else yyerror("ID repeat");
 			$$ = $1;
 		}

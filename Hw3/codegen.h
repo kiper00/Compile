@@ -5,42 +5,80 @@
 #include <string.h>
 #include "SymbolTable.h"
 
+/* Label Data */
+typedef struct Label{
+  int count;
+  int loop_flag;
+  struct Label* next; 
+}Label;
+
+/* Init data */
 FILE *file;
 char* name;
-typedef enum{
+int labelCount = 0;
+struct Label* leadL; 
+struct Label* endL;
+
+/* enum condition */
+typedef enum condition{
   IFLT,
   IFGT,
   IFLE,
   IFGE,
   IFEQ,
-  IFNE
+  IFNE,
+  AND,
+  OR
 }condition;
 
-struct Label {
-  int count;
-  int loop_flag;
-  Label(int num);
-};
+/* Label opreator */ 
+void LabelPush(Label* l){
+  endL->next = l;
+  endL = l;
+}
+void LabelPop(){
+  Label* l = leadL;
+  while(l->next != endL)
+    l = l->next;
+  endL = l;
+  endL->next = NULL;
+}
 
-class LabelManager{
-  private:
-    int labelCount;
-  public:
-    stack<Label> lStack;
-    LabelManager();
-    void pushNLabel(int n);
-    void NLabel(int n);
-    void popLabel();
-    int takeLabel(int n);
-    int getLable();
-    int getFlag();
-};
+Label* CreateLabel(int n){
+  Label* l = (Label*)malloc(sizeof(Label));
+  l->count = n;
+  l->loop_flag = -1;
+  l->next = NULL;
+  return l;
+}
+void pushNLabel(int n){
+  for(int i = 0; i < n; i++)
+    LabelPush(CreateLabel(labelCount));
+  labelCount += n;
+}
+void NLabel(int n){
+  endL->count += n;
+  labelCount += n;
+}
+void popLabel(){
+  LabelPop();
+}
+int takeLabel(int n){
+  return endL->count + n;
+}
+int getLabel(){
+  labelCount++;
+  return labelCount;
+}
+int getFlag(){
+  return endL->loop_flag;
+}
 
+/* javaa */
 void genProgramStart(char* filename){
   file = fopen("output.jasm","w");
   strcpy(name,filename);
   fprintf("class %s\n{\n",filename);
-  //out << "class " << filename << endl << "{" << endl;
 }
 void genProgramEnd(){
   fprintf("}\n");
@@ -89,17 +127,14 @@ void genOperator(char op){
     case '+': fprintf("\t\tiadd\n"); break;
     case '-': fprintf("\t\tisub\n"); break;
     case '~': fprintf("\t\tldc 1\n\t\tixor\n"); break;
-    //case '&': fprintf("\t\tiand\n"); break;
-    //case '|': fprintf("\t\tior\n"); break;
-    //case '%': fprintf("\t\tirem\n"); break;
     default:  break;
   }
 
 }
 void genCondOp(int op)){
   fprintf("\t\tisub\n");
-  int lb1 = lm.getLable();
-  int lb2 = lm.getLable();
+  int lb1 = getLabel();
+  int lb2 = getLabel();
   switch (op) {
     case IFLT: fprintf("\t\tiflt"); break;
     case IFGT: fprintf("\t\tifgt"); break;
@@ -107,14 +142,14 @@ void genCondOp(int op)){
     case IFGE: fprintf("\t\tifge"); break;
     case IFEQ: fprintf("\t\tifeq"); break;
     case IFNE: fprintf("\t\tifne"); break;
+    case AND:  fprintf("\t\tiand"); break;
+    case OR:   fprintf("\t\tior");  break;
     default: break;
   }
   fprintf(" L%d\n",lb1);
   fprintf("\t\ticonst_0\n");
   fprintf("\t\tgoto L%d\n",lb2);
-  //fprintf("\t\tnop\nL%d:\n",lb1);
   fprintf("\t\ticonst_1\n");
-  //fprintf("\t\tnop\nL%d:\n",lb2);
 }
 
 void genMainStart(){
@@ -173,34 +208,29 @@ void genCallFunc(SymbolTable* info){
 }
 
 void genIfStart(){
-  lm.pushNLabel(2);
-  fprintf("\t\tifeq L%d\n",lm.takeLabel(0));
+  pushNLabel(2);
+  fprintf("\t\tifeq L%d\n",takeLabel(0));
 }
 void genElse(){
-  fprintf("\t\tgoto L%d\n",lm.takeLabel(1));
-  //out << "\t\tnop" << endl << "L" << lm.takeLabel(0) << ":" << endl;
+  fprintf("\t\tgoto L%d\n",takeLabel(1));
 }
 void genIfEnd(){
-  //out << "\t\tnop" << endl << "L" << lm.takeLabel(0) << ":" << endl;
-  lm.popLabel();
+  popLabel();
 }
 void genIfElseEnd(){
-  //out << "\t\tnop" << endl << "L" << lm.takeLabel(1) << ":" << endl;
-  lm.popLabel();
+  popLabel();
 }
 
 void genWhileStart(){
-  lm.pushNLabel(1);
-  //out << "\t\tnop" << endl << "L" << lm.takeLabel(0) << ":" << endl;
+  pushNLabel(1);
 }
 void genWhileCond()
 {
-  lm.NLabel(1);
-  fprintf("\t\tifeq L%d\n",lm.takeLabel(3 + lm.getFlag()));
+  NLabel(1);
+  fprintf("\t\tifeq L%d\n",takeLabel(3 + getFlag()));
 }
 void genWhileEnd()
 {
-  fprintf("\t\tgoto L%d\n",lm.takeLabel(lm.getFlag()));
-  //out << "\t\tnop" << endl << "L" << lm.takeLabel(3 + lm.getFlag()) << ":" << endl;
-  lm.popLabel();
+  fprintf("\t\tgoto L%d\n",takeLabel(getFlag()));
+  popLabel();
 }

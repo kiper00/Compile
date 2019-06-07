@@ -211,6 +211,20 @@ SymbolTable* end;
 		return 0;
 	}
 
+	int lookupLocal(char* input){
+	// Find == 1 ,not == 0;
+		if(lead == NULL)
+			return 0;
+		SymbolTable* table = lead;
+		
+		while(table != NULL){
+			if(strcmp(table->id, input) == 0 && table->isglobal == 0)
+				return 1;
+			table = table->next;
+		}
+		return 0;
+	}
+
 /* Insert Block */
 
 	void RedefineType(int type, int isglobal){
