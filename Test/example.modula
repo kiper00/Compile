@@ -5,17 +5,18 @@
 module Example
 
 // constants
+const d = 1;
 const a = 5;
-
 // variables
 var c: integer;
     
 // procedure declaration
 procedure add(a:integer, b:integer) : integer
+var c: integer;
 begin
   return a+b;
 end add;
-    
+
 // main function
 begin
   c := add(a, 10);
@@ -24,6 +25,7 @@ begin
   else 
     print c;
   end;
+
   println "Hello World";
 end Example.
 

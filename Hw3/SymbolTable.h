@@ -133,6 +133,18 @@ SymbolTable* end;
 		}
 	}
 
+	
+	SymbolTable* ReturnLocalID(char* input){
+	// Return ID symbol table
+		SymbolTable* table = lead;
+		while(table != NULL){
+			if(strcmp(table->id, input) == 0 && table->isglobal == 1)
+				return table;
+			table = table->next;
+		}
+	}
+
+
 	int CompareFuncReturnType(FuncInfo* fun){
 	// Compare return type == function type ? true = 1 : false = 0
 		int type = fun->returnType;
@@ -261,6 +273,7 @@ SymbolTable* end;
 	void copyVar(SymbolTable* w, SymbolTable* r){
 	// Copy symbol table
 		strcpy(w->id,r->id);
+		w->index = r->index;
 		w->type = r->type;
 		w->ival = r->ival;
 		w->dval = r->dval;
@@ -271,6 +284,22 @@ SymbolTable* end;
 		w->arr2 = r->arr2;
 		w->isvar = r->isvar;
 		w->next = r->next;
+	}
+
+	void SetLocalIndex(){
+		int index = 0;
+		SymbolTable* t = lead->next;
+		while(t != NULL){
+			if(t->isglobal == 1 && t->isvar == 0){
+				t->index = index;
+				index++;
+			}
+			else if (t->isvar == 4){
+				t->index = index;
+				index++;
+			}
+			t = t->next;
+		}
 	}
 
 	void insertLocalToFunc(FuncInfo* fun){
@@ -285,7 +314,6 @@ SymbolTable* end;
 			table = table->next;
 		}
 		if(needAdd == 1){
-			int index = 0;
 			table = lead;
 			fun->lead = (SymbolTable*)malloc(sizeof(SymbolTable));
 			SymbolTable* f = fun->lead;
@@ -302,11 +330,6 @@ SymbolTable* end;
 				}
 				else
 					table = table->next;
-			}
-			while(f != NULL){
-				f->index = index;
-				f = f->next;
-				index++;
 			}
 		}
 	}
@@ -393,6 +416,7 @@ SymbolTable* end;
 		else{
 			while(table != NULL){
 				printf("\t%s\t",table->id);
+				if(1) printf("%d\t",table->index);
 				if(table->isvar == 0){
 					printf("var\t");
 					if(table->type == 0)
@@ -467,6 +491,7 @@ SymbolTable* end;
 				else if(table->isglobal == 1 && debug)
 					printf("local\t");
 				printf("%s\t",table->id);
+				if(1) printf("%d\t",table->index);
 				if(table->isvar == 0){
 					printf("var\t");
 					if(table->type == 0)
