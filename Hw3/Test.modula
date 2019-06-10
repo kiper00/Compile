@@ -3,40 +3,36 @@
  *)
 
 module Example
+// const
+const y = "TEST PRINT BOOLEAN ";
+d = true;
 
-const testr = -1.2;
-testa = 1.3;
 // variables
 var c: integer;
-z : real;
-x,s:array [-10,10] of integer;
-// procedure declaration : integer
+
+// null procedure
 procedure sas 
 begin
   return ;
 end sas;
+
+// procedure declaration : integer
 procedure add(a:integer, b:integer) : integer
-const y = "GOOD";
-u = true;
-var q,w,e: string;
-t:array [-10,10] of boolean;
 begin
-	read c;
   return a+b ;
 end add;
     
 // main function
 begin
-	x[1] := s[c];
-	z := testa - testr;
 
+  print y;
+  println d;
   c := add(c, 10);
   if (c > 10) then
     print -c;
   else 
     print c;
   end;
-	
   println "Hello World";
-end Example.
 
+end Example.
